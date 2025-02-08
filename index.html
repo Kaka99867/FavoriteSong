@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Music Player</title>
+    <style>
+        /* CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .player-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .album-art {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .song-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #1db954;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1ed760;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            height: 5px;
+        }
+
+        .playlist {
+            margin-top: 30px;
+        }
+
+        .song-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+        }
+
+        .song-item:hover {
+            background: #404040;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background: #404040;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 100%;
+            background: #1db954;
+            border-radius: 5px;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="player-controls">
+            <img src="images/intro.jpg" class="album-art" id="albumArt">
+            <div class="song-info">
+                <h2 id="songTitle">Select a song</h2>
+                <p id="artist">Artist</p>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="controls">
+                <button onclick="previousSong()">⏮</button>
+                <button onclick="togglePlay()" id="playBtn">▶</button>
+                <button onclick="nextSong()">⏭</button>
+            </div>
+            
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="1">
+        </div>
+
+        <div class="playlist" id="playlist">
+            <!-- Daftar lagu akan dimuat di sini -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript
+        const audio = new Audio();
+        let currentSongIndex = 0;
+        let isPlaying = false;
+
+        // Daftar lagu (sesuaikan dengan file musik Anda)
+        const songs = [
+            {
+                title: "Die with a smile",
+                artist: "bruno mars and lady gaga",
+                cover: src="images/cover1.jpg",
+                file: "music/Die With A Smile.mp3"
+            },
+            {
+                title: "baby by me",
+                artist: "50 Cent",
+                cover: "images/cover2.jpg",
+                file: "music/Have a baby by me baby be.mp3"
+            },
+            {
+                title: "Treat You Better",
+                artist: "Shawn Mendes",
+                cover: "images/cover3.jpg",
+                file: "music/Treat You Better.mp3"
+            },
+            {
+                title: "Story of my Life",
+                artist: "ONE DIRECTION",
+                cover: "images/cover4.jpg",
+                file: "music/Story of my Life.mp3"
+            },
+            {
+                title: "abcdefu",
+                artist: "GAYLE",
+                cover: "images/cover5.jpg",
+                file: "music/abcdefu.mp3"
+            },
+            {
+                title: "End Of Beginning",
+                artist: "Djo",
+                cover: "images/cover6.jpg",
+                file: "music/End Of Beginning.mp3"
+            },
+            {
+                title: "Photograph",
+                artist: "Ed Sheeran",
+                cover: "images/cover7.jpg",
+                file: "music/Photograph.mp3"
+            },
+            {
+                title: "APT",
+                artist: "ROSÉ & Bruno Mars",
+                cover: "images/cover8.jpg",
+                file: "music/APT.mp3"
+            },
+            {
+                title: "We Don't Talk Anymore",
+                artist: "Charlie Puth",
+                cover: "images/cover9.jpg",
+                file: "music/We Don't Talk Anymore.mp3"
+            },
+            {
+                title: "Wish You Were Here",
+                artist: "Neck deep",
+                cover: "images/cover10.jpg",
+                file: "music/Wish You Were Here.mp3"
+            },
+            {
+                title: "December",
+                artist: "Neck deep",
+                cover: "images/cover11.jpg",
+                file: "music/December.mp3"
+            },
+            {
+                title: "WTF Do I Know",
+                artist: "Miley Cyrus",
+                cover: "images/cover12.jpg",
+                file: "music/WTF Do I Know.mp3"
+            },
+            {
+                title: "drunk text",
+                artist: "Henry Moodie",
+                cover: "images/cover13.jpg",
+                file: "music/drunk text.mp3"
+            },
+            {
+                title: "Attention",
+                artist: "Charlie Puth",
+                cover: "images/cover14.jpg",
+                file: "music/Attention.mp3"
+            },
+            {
+                title: "There's Nothing Holding Me Back",
+                artist: "Shawn Mendes",
+                cover: "images/cover15.jpg",
+                file: "music/There's Nothing Holding Me Back.mp3"
+            },
+            {
+                title: "Skyfall",
+                artist: "Adele",
+                cover: "images/cover16.jpg",
+                file: "music/Skyfall.mp3"
+            },
+            {
+                title: "A Little Piece Of Heaven",
+                artist: "Avenged Sevenfold",
+                cover: "images/cover17.jpg",
+                file: "music/A Little Piece Of Heaven.mp3"
+            },
+            {
+                title: "Bring Me To Life",
+                artist: "Evanescence",
+                cover: "images/cover18.jpg",
+                file: "music/Bring Me To Life.mp3"
+            },
+            {
+                title: "Happy Nation",
+                artist: "Ace of Base",
+                cover: "images/cover19.jpg",
+                file: "music/Happy Nation.mp3"
+            },
+            {
+                title: "Nonsense",
+                artist: "Sabrina Carpenter",
+                cover: "images/cover20.jpg",
+                file: "music/Nonsense.mp3"
+            },
+            {
+                title: "Smack That",
+                artist: "Akon",
+                cover: "images/cover21.jpg",
+                file: "music/Smack That.mp3"
+            },
+            {
+                title: "Starboy",
+                artist: "The Weeknd",
+                cover: "images/cover22.jpg",
+                file: "music/Starboy.mp3"
+            }
+        ];
+
+        // Inisialisasi player
+        function initPlayer() {
+            // Membuat daftar lagu
+            const playlist = document.getElementById('playlist');
+            songs.forEach((song, index) => {
+                const div = document.createElement('div');
+                div.className = 'song-item';
+                div.innerHTML = `${song.title} - ${song.artist}`;
+                div.onclick = () => playSong(index);
+                playlist.appendChild(div);
+            });
+        }
+
+        // Memutar lagu
+        function playSong(index) {
+            currentSongIndex = index;
+            const song = songs[index];
+            
+            audio.src = song.file;
+            document.getElementById('songTitle').textContent = song.title;
+            document.getElementById('artist').textContent = song.artist;
+            document.getElementById('albumArt').src = song.cover;
+            
+            audio.play();
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = '⏸';
+        }
+
+        // Play/Pause
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                document.getElementById('playBtn').textContent = '▶';
+            } else {
+                audio.play();
+                document.getElementById('playBtn').textContent = '⏸';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Next song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            playSong(currentSongIndex);
+        }
+
+        // Previous song
+        function previousSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            playSong(currentSongIndex);
+        }
+
+        // Update progress bar
+        audio.ontimeupdate = () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        };
+
+        // Click progress bar to seek
+        document.getElementById('progressContainer').onclick = (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        };
+
+        // Volume control
+        document.getElementById('volume').oninput = (e) => {
+            audio.volume = e.target.value;
+        };
+
+        // When song ends
+        audio.onended = () => {
+            nextSong();
+        };
+
+        // Jalankan inisialisasi saat halaman dimuat
+        window.onload = initPlayer;
+    </script>
+</body>
+</html>
